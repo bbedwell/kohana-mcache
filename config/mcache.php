@@ -2,7 +2,7 @@
 
 return array
 (
-	'servers'            => array(
+	'servers' => array(
 		array(
 			'host'             => 'localhost',  // Memcache Server
 			'port'             => 11211,        // Memcache port number
