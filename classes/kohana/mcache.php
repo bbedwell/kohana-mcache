@@ -4,14 +4,29 @@
  * on inserts/updates/deletes.
  *
  * @package    Kohana_Mcache
- * @author     Bryce Bedwell <brycebedwell@gmail.com>
+ * @author     Bryce Bedwell <bryce@familylink.com>
+ * @copyright  FamilyLink.com
+ *
+ * Copyright (c) 2011 FamilyLink.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  **/
 class Kohana_Mcache {
 	
 	/**
 	 * @var  Memcache  Memcache instance
 	 */
-	private $memcache;
+	private $cache;
 	
 	/**
 	 * @var  array  Configuration details pulled from config file
@@ -28,15 +43,23 @@ class Kohana_Mcache {
 	 *
 	 * @return  void
 	 */
-	public function __construct($id = NULL)
+	public function __construct($id = NULL, Memcache &$cache = NULL)
 	{
 		$this->config = Kohana::$config->load('mcache');
-		$this->memcache = new Memcache();
 		$this->id = $id;
+		
+		if($cache)
+		{
+			$this->cache = $cache;
+		}
+		else
+		{
+			$this->cache = new Memcache();
+		}
 		
 		foreach ($this->config['servers'] as $server)
 		{
-			$this->memcache->addServer($server['host'], $server['port']);
+			$this->cache->addServer($server['host'], $server['port']);
 		}
 	}
 	
@@ -48,7 +71,7 @@ class Kohana_Mcache {
 	public function set(array $tables, $sql, $result, $lifetime)
 	{
 		$hash = $this->get_query_key($sql);
-		$this->memcache->set($hash, $this->condense($result), $lifetime);
+		$this->cache->set($hash, $this->condense($result), $lifetime);
 
 		foreach($tables as $table)
 		{
@@ -64,7 +87,7 @@ class Kohana_Mcache {
 	public function get($sql)
 	{
 		$hash = $this->get_query_key($sql);
-		if( ($result = $this->memcache->get($hash)) )
+		if( ($result = $this->cache->get($hash)) )
 		{
 			return $this->uncondense($result);
 		}
@@ -80,7 +103,7 @@ class Kohana_Mcache {
 		$history = $this->get_history($table);
 		foreach($history as $hash)
 		{
-			$this->memcache->delete($hash);
+			$this->cache->delete($hash);
 		}
 		
 		$this->set_history($table, array());
@@ -151,7 +174,7 @@ class Kohana_Mcache {
 	private function get_history($table)
 	{
 		$key = $this->get_table_key($table);
-		if( ($result = $this->memcache->get($key)) )
+		if( ($result = $this->cache->get($key)) )
 		{
 			return $this->uncondense($result);
 		}
@@ -167,7 +190,7 @@ class Kohana_Mcache {
 	private function set_history($table, $history)
 	{
 		$key = $this->get_table_key($table);
-		$this->memcache->set($key, $this->condense($history));
+		$this->cache->set($key, $this->condense($history));
 	}
 
 } // End Mcache

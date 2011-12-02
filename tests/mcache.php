@@ -1,9 +1,26 @@
 <?php defined('SYSPATH') or die('No direct script access.');
+
+require_once(dirname(__FILE__).'/mocks/mockmemcache.php');
+
 /**
  * Test case to ensure stability in the Mcache module
  *
  * @package    Kohana_Mcache
  * @author     Bryce Bedwell <brycebedwell@gmail.com>
+ *
+ * Copyright (c) 2011 FamilyLink.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  **/
 class Tests_Mcache extends Unittest_TestCase {
 	
@@ -16,10 +33,10 @@ class Tests_Mcache extends Unittest_TestCase {
 	
 	public function setUp()
 	{
-		$this->memcache = new Memcache();
+		$this->memcache = new MockMemcache();
 		$this->memcache->addServer('localhost',11211);
 		
-		$this->mcache = new Mcache();
+		$this->mcache = new Mcache('',$this->memcache);
 		
 		$this->memcache->flush();
 		
