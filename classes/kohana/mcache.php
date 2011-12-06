@@ -91,6 +91,8 @@ class Kohana_Mcache {
 		{
 			return $this->uncondense($result);
 		}
+		
+		return NULL;
 	}
 	
 	/**

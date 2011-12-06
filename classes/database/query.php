@@ -6,8 +6,21 @@ class Database_Query extends Kohana_Database_Query {
 	
 	public function execute($db = NULL, $as_object = NULL, $object_params = NULL)
 	{
+		// Check that memcache cache exists
+		if ( class_exists('Memcache') )
+		{
+			$cache_available = TRUE;
+		}
+		else
+		{
+			$cache_available = FALSE;
+		}
+		
 		// Instantiate new Mcache object
-		$mcache = new Mcache();
+		if ($cache_available)
+		{
+			$mcache = new Mcache();
+		}
 		
 		if ( ! is_object($db))
 		{
@@ -30,7 +43,7 @@ class Database_Query extends Kohana_Database_Query {
 		
 		if ($this->_lifetime !== NULL AND $this->_type === Database::SELECT)
 		{
-			if( ($result = $mcache->get($sql)) !== NULL AND !$this->_force_execute )
+			if( ($result = $mcache->get($sql)) !== NULL AND !$this->_force_execute AND $cache_available)
 			{
 				return new Database_Result_Cached($result, $sql, $as_object, $object_params);
 			}
@@ -39,15 +52,17 @@ class Database_Query extends Kohana_Database_Query {
 		// Execute the query
 		$result = $db->query($this->_type, $sql, $as_object, $object_params);
 		
-		if($this->_type === Database::SELECT)
-		{
-			$mcache->set($this->_from, $sql, $result->as_array(), $this->_lifetime);
+		if ($cache_available) {
+			if($this->_type === Database::SELECT)
+			{
+				$mcache->set($this->_from, $sql, $result->as_array(), $this->_lifetime);
+			}
+			else
+			{
+				$mcache->invalidate($this->_table);
+			}
 		}
-		else
-		{
-			$mcache->invalidate($this->_table);
-		}
-
+		
 		return $result;
 	}
 
