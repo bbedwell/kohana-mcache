@@ -41,7 +41,7 @@ class Database_Query extends Kohana_Database_Query {
 		// Compile the SQL query
 		$sql = $this->compile($db);
 		
-		if ($this->_lifetime !== NULL AND $this->_type === Database::SELECT AND $cache_available)
+		if ($this->_lifetime !== NULL AND !$this->_force_execute AND $this->_type === Database::SELECT AND $cache_available)
 		{
 			if( ($result = $mcache->get($sql)) !== NULL AND !$this->_force_execute)
 			{
