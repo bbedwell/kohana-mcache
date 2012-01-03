@@ -71,7 +71,7 @@ class Kohana_Mcache {
 	public function set(array $tables, $sql, $result, $lifetime)
 	{
 		$hash = $this->get_query_key($sql);
-		$this->cache->set($hash, $this->condense($result), $lifetime);
+		$this->cache->set($hash, $this->condense($result), 0, $lifetime);
 
 		foreach($tables as $table)
 		{
