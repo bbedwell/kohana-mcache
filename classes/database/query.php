@@ -3,6 +3,14 @@
 class Database_Query extends Kohana_Database_Query {
 	
 	protected $_lifetime = 3600;
+	protected $_other_tables = array();
+
+	public function add_table_to_cache($table)
+	{
+		$this->_other_tables[] = $table;
+
+		return $this;
+	}
 	
 	public function execute($db = NULL, $as_object = NULL, $object_params = NULL)
 	{
@@ -55,7 +63,8 @@ class Database_Query extends Kohana_Database_Query {
 		if ($cache_available) {
 			if($this->_type === Database::SELECT)
 			{
-				$mcache->set($this->_from, $sql, $result->as_array(), $this->_lifetime);
+				$from = array_merge($this->_from,$this->_other_tables);
+				$mcache->set($from, $sql, $result->as_array(), $this->_lifetime);
 			}
 			else
 			{
