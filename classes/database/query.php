@@ -59,14 +59,14 @@ class Database_Query extends Kohana_Database_Query {
 
 		// Execute the query
 		$result = $db->query($this->_type, $sql, $as_object, $object_params);
-		
+
 		if ($cache_available) {
 			if($this->_type === Database::SELECT)
 			{
 				$from = array_merge($this->_from,$this->_other_tables);
 				$mcache->set($from, $sql, $result->as_array(), $this->_lifetime);
 			}
-			else
+			elseif(isset($this->_table))
 			{
 				$mcache->invalidate($this->_table);
 			}
